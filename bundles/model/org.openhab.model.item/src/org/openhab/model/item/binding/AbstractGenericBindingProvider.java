@@ -78,7 +78,7 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
 
 		synchronized (contextMap) {
 			Set<Item> items = contextMap.get(context);
-			if (items==null) {
+			if (items == null) {
 				items = new HashSet<Item>();
 				contextMap.put(context, items);
 			}
@@ -91,15 +91,18 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
 	 * {@inheritDoc}
 	 */
 	public void removeConfigurations(String context) {
+		Set<Item> items = null;
 		synchronized (contextMap) {
-			Set<Item> items = contextMap.get(context);
-			if(items!=null) {
-				for(Item item : items) {
-					// we remove all binding configurations for all items
-					bindingConfigs.remove(item.getName());
-					notifyListeners(item);
-				}
+			items = contextMap.get(context);
+			if (items != null) {
 				contextMap.remove(context);
+			}
+		}
+		if (items != null) {
+			for (Item item : items) {
+				// we remove all binding configurations for all items
+				bindingConfigs.remove(item.getName());
+				notifyListeners(item);
 			}
 		}
 	}
