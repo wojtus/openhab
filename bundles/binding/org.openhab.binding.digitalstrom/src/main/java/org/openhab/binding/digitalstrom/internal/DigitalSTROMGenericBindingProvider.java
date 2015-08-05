@@ -124,6 +124,6 @@ public class DigitalSTROMGenericBindingProvider extends AbstractGenericBindingPr
 
 	@Override
 	public Set<Item> getItemNamesByContext(String context) {
-		return new HashMap<String, Set<Item>>(super.contextMap).get(context);
+		return contextMap.get(context);
 	}
 }
