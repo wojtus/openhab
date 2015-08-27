@@ -10,11 +10,12 @@ package org.openhab.binding.fs20.internal;
 
 import java.math.BigDecimal;
 
+import org.openhab.core.library.types.IncreaseDecreaseType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 import org.openhab.core.types.UnDefType;
 
 /**
@@ -25,10 +26,16 @@ import org.openhab.core.types.UnDefType;
  * @since 1.4.0
  */
 public class FS20CommandHelper {
+	
+	private static enum DimMode{
+		UP_DOWN_MODE, INC_DEC_MODE
+	}
 
 	public static FS20Command convertHABCommandToFS20Command(Command command) {
 		if (command instanceof UpDownType) {
 			return convertUpDownType((UpDownType) command);
+		} else if (command instanceof IncreaseDecreaseType) {
+			return convertIncreaseDecreaseType((IncreaseDecreaseType) command);
 		} else if (command instanceof OnOffType) {
 			return convertOnOffType((OnOffType) command);
 		} else if (command instanceof PercentType) {
@@ -37,7 +44,13 @@ public class FS20CommandHelper {
 		return null;
 	}
 
-	public static State getStateFromFS20Command(FS20Command command) {
+
+	public static Type getTypeFromFS20Command(FS20Command command) {
+		return getTypeFromFS20Command(command, DimMode.INC_DEC_MODE);
+	}
+
+	
+	private static Type getTypeFromFS20Command(FS20Command command, DimMode dimMode) {
 
 		switch (command) {
 		case ON_OLD_DIM_VALUE:
@@ -46,9 +59,9 @@ public class FS20CommandHelper {
 		case OFF:
 			return OnOffType.OFF;
 		case DIM_UP:
-			return UpDownType.UP;
+			return getDimTypeFromFS20Command(command, dimMode);
 		case DIM_DOWN:
-			return UpDownType.DOWN;
+			return getDimTypeFromFS20Command(command, dimMode);
 		case DIM_1:
 		case DIM_2:
 		case DIM_3:
@@ -73,7 +86,40 @@ public class FS20CommandHelper {
 			return UnDefType.UNDEF;
 		}
 	}
+	private static Type getDimTypeFromFS20Command(FS20Command command, DimMode dimMode){
+		switch (dimMode) {
+		case UP_DOWN_MODE:
+			return getDimTypeFromFS20CommandInUpDownMode(command);
+		case INC_DEC_MODE:
+			return getDimTypeFromFS20CommandInIncDecMode(command);
+		default:
+			return null;
+		}
+	}
+	
+	private static Type getDimTypeFromFS20CommandInIncDecMode(FS20Command command) {
+		switch (command) {
+		case DIM_UP:
+			return IncreaseDecreaseType.INCREASE;
+		case DIM_DOWN:
+			return IncreaseDecreaseType.DECREASE;
+		default:
+			return null;
+		}
+	}
 
+
+	private static Type getDimTypeFromFS20CommandInUpDownMode(FS20Command command){
+		switch (command) {
+		case DIM_UP:
+			return UpDownType.UP;
+		case DIM_DOWN:
+			return UpDownType.DOWN;
+		default:
+			return null;
+		}	
+	}
+	
 	private static FS20Command convertPercentType(PercentType percentType) {
 		double percentValue = percentType.doubleValue();
 		int step = (int) (percentValue / 6.25);
@@ -100,6 +146,18 @@ public class FS20CommandHelper {
 		case DOWN:
 			return FS20Command.DIM_DOWN;
 		case UP:
+			return FS20Command.DIM_UP;
+		default:
+			return null;
+		}
+	}
+	
+	private static FS20Command convertIncreaseDecreaseType(
+			IncreaseDecreaseType incDec) {
+		switch (incDec) {
+		case DECREASE:
+			return FS20Command.DIM_DOWN;
+		case INCREASE:
 			return FS20Command.DIM_UP;
 		default:
 			return null;

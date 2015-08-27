@@ -17,6 +17,8 @@ import org.openhab.binding.fs20.FS20BindingConfig;
 import org.openhab.binding.fs20.FS20BindingProvider;
 import org.openhab.core.binding.AbstractActiveBinding;
 import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
 import org.openhab.io.transport.cul.CULCommunicationException;
 import org.openhab.io.transport.cul.CULDeviceException;
 import org.openhab.io.transport.cul.CULHandler;
@@ -230,10 +232,23 @@ public class FS20Binding extends AbstractActiveBinding<FS20BindingProvider>
 			FS20Command fs20Command = FS20Command.getFromHexValue(command);
 			logger.debug("Received command " + fs20Command.toString()
 					+ " for device " + config.getAddress());
-			eventPublisher.postUpdate(config.getItem().getName(),
-					FS20CommandHelper.getStateFromFS20Command(fs20Command));
+			String itemName = config.getItem().getName();
+			Type typeFromFS20Command = FS20CommandHelper.getTypeFromFS20Command(fs20Command);
+			publishEvent(itemName, typeFromFS20Command);
+
 		} else {
 			logger.debug("Received message for unknown device " + fullAddress);
+		}
+	}
+
+	private void publishEvent(String itemName, Type typeFromFS20Command) {
+		if (typeFromFS20Command instanceof State){
+			eventPublisher.postUpdate(itemName,(State) typeFromFS20Command);
+		} else
+		if (typeFromFS20Command instanceof Command){
+			eventPublisher.postCommand(itemName,(Command) typeFromFS20Command);
+		} else {
+			logger.warn("Wrong event type created from FS20 command");
 		}
 	}
 
