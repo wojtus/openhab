@@ -48,13 +48,13 @@ public class FS20Binding extends AbstractActiveBinding<FS20BindingProvider>
 	/**
 	 * Controls the way, {@link FS20Binding} interprets the 
 	 * {@link FS20Command#DIM_UP} and {@link FS20Command#DIM_DOWN}.
-	 * In {@link DimMode#UP_DOWN_MODE} the binding publishes {@link UpDownType} 
+	 * In {@link DimMode#UP_DOWN} the binding publishes {@link UpDownType} 
 	 * events.
-	 * In {@link DimMode#INC_DEC_MODE} the binding publishes {@link IncreaseDecreaseType} 
+	 * In {@link DimMode#INC_DEC} the binding publishes {@link IncreaseDecreaseType} 
 	 * events.   
 	 */	
 	static enum DimMode{
-		UP_DOWN_MODE, INC_DEC_MODE
+		UP_DOWN, INC_DEC
 	}
 	private final static String KEY_DEVICE_NAME = "device";
 	private final static String KEY_BAUD_RATE = "baudrate";
@@ -76,7 +76,7 @@ public class FS20Binding extends AbstractActiveBinding<FS20BindingProvider>
 	/**
 	 * Reaction to dim_up/dim_down commands
 	 */
-	private DimMode dimMode = DimMode.UP_DOWN_MODE;
+	private DimMode dimMode = DimMode.UP_DOWN;
 
 	public FS20Binding() {
 	}

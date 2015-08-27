@@ -82,9 +82,9 @@ public class FS20CommandHelper {
 
 	private static Type getDimTypeFromFS20Command(FS20Command command, DimMode dimMode){
 		switch (dimMode) {
-		case UP_DOWN_MODE:
+		case UP_DOWN:
 			return getDimTypeFromFS20CommandInUpDownMode(command);
-		case INC_DEC_MODE:
+		case INC_DEC:
 			return getDimTypeFromFS20CommandInIncDecMode(command);
 		default:
 			return null;
