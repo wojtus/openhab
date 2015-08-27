@@ -10,6 +10,7 @@ package org.openhab.binding.fs20.internal;
 
 import java.math.BigDecimal;
 
+import org.openhab.binding.fs20.internal.FS20Binding.DimMode;
 import org.openhab.core.library.types.IncreaseDecreaseType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
@@ -27,9 +28,7 @@ import org.openhab.core.types.UnDefType;
  */
 public class FS20CommandHelper {
 	
-	private static enum DimMode{
-		UP_DOWN_MODE, INC_DEC_MODE
-	}
+
 
 	public static FS20Command convertHABCommandToFS20Command(Command command) {
 		if (command instanceof UpDownType) {
@@ -43,14 +42,8 @@ public class FS20CommandHelper {
 		}
 		return null;
 	}
-
-
-	public static Type getTypeFromFS20Command(FS20Command command) {
-		return getTypeFromFS20Command(command, DimMode.INC_DEC_MODE);
-	}
-
 	
-	private static Type getTypeFromFS20Command(FS20Command command, DimMode dimMode) {
+	public static Type getTypeFromFS20Command(FS20Command command, DimMode dimMode) {
 
 		switch (command) {
 		case ON_OLD_DIM_VALUE:
@@ -86,6 +79,7 @@ public class FS20CommandHelper {
 			return UnDefType.UNDEF;
 		}
 	}
+
 	private static Type getDimTypeFromFS20Command(FS20Command command, DimMode dimMode){
 		switch (dimMode) {
 		case UP_DOWN_MODE:
@@ -107,7 +101,6 @@ public class FS20CommandHelper {
 			return null;
 		}
 	}
-
 
 	private static Type getDimTypeFromFS20CommandInUpDownMode(FS20Command command){
 		switch (command) {

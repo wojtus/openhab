@@ -16,6 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import org.openhab.binding.fs20.FS20BindingConfig;
 import org.openhab.binding.fs20.FS20BindingProvider;
 import org.openhab.core.binding.AbstractActiveBinding;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
@@ -43,11 +45,22 @@ public class FS20Binding extends AbstractActiveBinding<FS20BindingProvider>
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(FS20Binding.class);
-
+	/**
+	 * Controls the way, {@link FS20Binding} interprets the 
+	 * {@link FS20Command#DIM_UP} and {@link FS20Command#DIM_DOWN}.
+	 * In {@link DimMode#UP_DOWN_MODE} the binding publishes {@link UpDownType} 
+	 * events.
+	 * In {@link DimMode#INC_DEC_MODE} the binding publishes {@link IncreaseDecreaseType} 
+	 * events.   
+	 */	
+	static enum DimMode{
+		UP_DOWN_MODE, INC_DEC_MODE
+	}
 	private final static String KEY_DEVICE_NAME = "device";
 	private final static String KEY_BAUD_RATE = "baudrate";
 	private final static String KEY_PARITY = "parity";
-
+	private final static String KEY_DIM_MODE = "dimmode";
+	
 	private String deviceName;
 		
 	private Map<String, Object> properties = new HashMap<String, Object>();
@@ -59,6 +72,11 @@ public class FS20Binding extends AbstractActiveBinding<FS20BindingProvider>
 	 * (optional, defaults to 60000ms)
 	 */
 	private long refreshInterval = 60000;
+	
+	/**
+	 * Reaction to dim_up/dim_down commands
+	 */
+	private DimMode dimMode = DimMode.UP_DOWN_MODE;
 
 	public FS20Binding() {
 	}
@@ -199,10 +217,17 @@ public class FS20Binding extends AbstractActiveBinding<FS20BindingProvider>
 			if(configChanged){
 				updateDeviceSettings();
 			}
-
 			setProperlyConfigured(true);
 			// read further config parameters here ...
-
+			String dimModeString = (String) config.get(KEY_DIM_MODE);
+			if (StringUtils.isNotEmpty(dimModeString)) {
+				try{
+					dimMode= DimMode.valueOf(dimModeString);	
+				}catch(IllegalArgumentException e){
+					logger.warn("Wrong dimmode value. Only " + DimMode.values() +" are supported");
+				}
+			}
+			logger.debug("Dim mode " + dimMode);
 		}
 	}
 
@@ -233,7 +258,7 @@ public class FS20Binding extends AbstractActiveBinding<FS20BindingProvider>
 			logger.debug("Received command " + fs20Command.toString()
 					+ " for device " + config.getAddress());
 			String itemName = config.getItem().getName();
-			Type typeFromFS20Command = FS20CommandHelper.getTypeFromFS20Command(fs20Command);
+			Type typeFromFS20Command = FS20CommandHelper.getTypeFromFS20Command(fs20Command, dimMode);
 			publishEvent(itemName, typeFromFS20Command);
 
 		} else {
